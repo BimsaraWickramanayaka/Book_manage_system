@@ -11,3 +11,7 @@ Route::apiResource('books', BookController::class);
 Route::post('borrow', [BorrowController::class, 'borrow']);
 Route::post('return', [BorrowController::class, 'returnBook']);
 Route::get('borrow-records', [BorrowController::class, 'index']);
+
+Route::get('users', function () {
+    return \App\Models\User::all();
+});
