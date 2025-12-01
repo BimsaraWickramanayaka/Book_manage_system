@@ -24,6 +24,7 @@ class BookController extends Controller
                 'author'=>$b->author,
                 'price'=>number_format($b->price,2,'.',''),
                 'stock'=>$b->stock,
+                'book_category_id'=>$b->book_category_id,
                 'category'=> $b->category ? $b->category->name : null,
                 'out_of_stock' => $b->stock <= 0
             ];
