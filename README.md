@@ -20,8 +20,16 @@ A full-stack web application for managing books, categories, and borrowing recor
 
 ## ✨ Features
 
+### Authentication & Security
+- ✅ JWT (JSON Web Token) based authentication
+- ✅ Secure login system with email/password
+- ✅ Automatic token storage in localStorage
+- ✅ Axios interceptors for automatic token injection
+- ✅ Auto-logout on token expiration (401 errors)
+- ✅ Demo credentials pre-filled for easy testing
+
 ### Book Management
-- ✅ Create, read, update, and delete books
+- ✅ Create, read, update, and delete books (authenticated users only)
 - ✅ Organize books by categories
 - ✅ Track book stock levels
 - ✅ Filter books by category
@@ -266,7 +274,16 @@ Open your browser and navigate to:
 http://localhost:5173
 ```
 
-You should see the Book Management interface.
+You will be redirected to the **Login Page**.
+
+### Login with Demo Credentials
+
+```
+Email: test@example.com
+Password: password
+```
+
+The credentials are pre-filled for easy testing. After login, you'll have access to the full Book Management interface.
 
 ---
 
@@ -274,21 +291,60 @@ You should see the Book Management interface.
 
 All endpoints return JSON and are prefixed with `/api`.
 
+### Authentication
+
+| Method | Endpoint | Auth Required | Description |
+|--------|----------|---------------|-------------|
+| `POST` | `/login` | No | Login and get JWT token |
+| `GET` | `/me` | Yes | Get current user info |
+| `POST` | `/logout` | Yes | Logout and invalidate token |
+
+**Login Request Body:**
+
+```json
+{
+  "email": "test@example.com",
+  "password": "password"
+}
+```
+
+**Login Response:**
+
+```json
+{
+  "message": "Login successful",
+  "token": "eyJ0eXAiOiJKV1QiLCJhbGc...",
+  "user": {
+    "id": 1,
+    "name": "Test User",
+    "email": "test@example.com"
+  }
+}
+```
+
+**Using the Token:**
+
+Add the token to the `Authorization` header for all protected requests:
+
+```
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGc...
+```
+
 ### Categories
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/categories` | Get all book categories |
+| Method | Endpoint | Auth Required | Description |
+|--------|----------|---------------|-------------|
+| `GET` | `/categories` | Yes | Get all book categories |
 
 ### Books
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/books` | Get all books (filterable by `category_id`) |
-| `GET` | `/books/{id}` | Get single book |
-| `POST` | `/books` | Create new book |
-| `PUT` | `/books/{id}` | Update book |
-| `DELETE` | `/books/{id}` | Delete book |
+| Method | Endpoint | Auth Required | Description |
+|--------|----------|---------------|-------------|
+| `GET` | `/books` | Yes | Get all books (filterable by `category_id`) |
+| `GET` | `/books/{id}` | Yes | Get single book |
+| `POST` | `/books` | Yes | Create new book |
+| `PUT` | `/books/{id}` | Yes | Update book |
+| `DELETE` | `/books/{id}` | Yes | Delete book |
 
 **Query Parameters:**
 - `category_id` (optional): Filter books by category
@@ -301,11 +357,11 @@ GET /api/books?category_id=1
 
 ### Borrow & Return
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/borrow` | Record book borrow |
-| `POST` | `/return` | Record book return |
-| `GET` | `/borrow-records` | Get all borrow records |
+| Method | Endpoint | Auth Required | Description |
+|--------|----------|---------------|-------------|
+| `POST` | `/borrow` | Yes | Record book borrow |
+| `POST` | `/return` | Yes | Record book return |
+| `GET` | `/borrow-records` | Yes | Get all borrow records |
 
 **POST `/borrow` Body:**
 
@@ -326,9 +382,9 @@ GET /api/books?category_id=1
 
 ### Users
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/users` | Get all users |
+| Method | Endpoint | Auth Required | Description |
+|--------|----------|---------------|-------------|
+| `GET` | `/users` | Yes | Get all users |
 
 ---
 
@@ -386,29 +442,37 @@ GET /api/books?category_id=1
 ### Backend Implementation
 
 ✅ **RESTful API** with proper HTTP methods and status codes  
+✅ **JWT Authentication** with tymon/jwt-auth package  
 ✅ **PostgreSQL Database** with proper relationships and migrations  
 ✅ **Eloquent ORM** for database interactions  
 ✅ **Form Validation** using Laravel Form Requests  
 ✅ **Database Seeders** for demo data  
 ✅ **Relationship Management** (belongsTo, hasMany)  
+✅ **Protected Routes** with auth:api middleware  
+✅ **Exception Handling** for JWT token errors  
 
 ### Frontend Implementation
 
 ✅ **React Components** for modular UI  
-✅ **Axios** for HTTP requests to backend API  
+✅ **JWT Login System** with LoginPage component  
+✅ **Axios Interceptors** for automatic token injection  
 ✅ **State Management** using React hooks (useState, useEffect)  
+✅ **Auto-Logout** on token expiration (401 errors)  
 ✅ **Category Filtering** for books  
 ✅ **CRUD Operations** integrated with backend  
 ✅ **Error Handling** with user-friendly messages  
 ✅ **Responsive Design** with CSS styling  
+✅ **localStorage** for token persistence  
 
 ### Key Features Implemented
 
+✅ **Authentication & Authorization** - JWT-based secure login  
 ✅ Book Management (Create, Read, Update, Delete)  
 ✅ Category Management (List & Filter)  
 ✅ Borrow/Return System with stock tracking  
 ✅ User tracking for borrowing  
 ✅ Data validation on both frontend and backend  
+✅ Protected API endpoints requiring authentication  
 
 ---
 
@@ -436,6 +500,45 @@ GET /api/books?category_id=1
 **Error: "Cannot GET /api/..."**
 - Check backend server is running
 - Verify API endpoint URLs in `src/api/api.js`
+
+---
+
+## 📮 API Testing with Postman
+
+### Postman Collection
+
+A Postman collection is available for testing all API endpoints. Contact the author for access to the collection.
+
+### Testing Flow
+
+1. **Login First:**
+   - Send POST request to `/api/login`
+   - Use demo credentials: `test@example.com` / `password`
+   - Copy the returned `token`
+
+2. **Set Bearer Token (In Postman):**
+   - In collection settings, go to **Authorization** tab
+   - Type: **Bearer Token**
+   - Token: Paste your JWT token
+   - All requests will automatically include the token
+
+3. **Test Endpoints:**
+   - All protected endpoints now include the Authorization header
+   - Try creating, reading, updating, deleting books
+   - Test borrow/return functionality
+
+4. **Logout:**
+   - Send POST request to `/api/logout`
+   - Token is invalidated
+   - Protected routes will now return 401 Unauthorized
+
+### Example Postman Request
+
+```
+GET /api/books
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGc...
+Content-Type: application/json
+```
 
 ---
 
